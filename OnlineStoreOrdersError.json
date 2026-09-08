@@ -1,0 +1,99 @@
+{
+  "name": "OnlineStoreOrdersError",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e90273fa-f5cc-44f7-987b-9d3cb84a69fb",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "={{ $json.content }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "663c1b41-84df-425b-85a8-5607477aaf4e",
+      "name": "NotifyDiscord",
+      "webhookId": "ac28f084-748e-45c7-8443-b7ebc5138245",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "q1d4m8F4nZ97lYO1",
+          "name": "Salma'sWebhook"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c7fd1506-c095-47f8-a965-6eea9f9f5224",
+              "name": "content",
+              "value": "=Workflow Error Alert - Workflow: {{ $json.workflow.name }} | Error: {{ $json.execution.error.message }} | Last node: {{ $json.execution.lastNodeExecuted }} | Execution URL: {{ $json.execution.url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "9cffdc46-d401-4363-85f3-2e9b17e051fd",
+      "name": "BuildErrorMessage"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "BuildErrorMessage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BuildErrorMessage": {
+      "main": [
+        [
+          {
+            "node": "NotifyDiscord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "38e61d61-cad4-4861-a5f5-7deb73348f88",
+  "meta": {
+    "instanceId": "1c5d83dcf2837c5c0b30ea27897c587f3557d43f828eb309520227db1354081c"
+  },
+  "nodeGroups": [],
+  "id": "lHtthMckbeVblE7M",
+  "tags": []
+}

@@ -1,0 +1,617 @@
+{
+  "name": "OnlineStoreOrders",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "1fb44e99-d13b-4dac-ba40-76436ce590c4",
+        "authentication": "basicAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -48,
+        256
+      ],
+      "id": "b9f1a0da-2896-481b-8817-174730195e01",
+      "name": "ProcessingOrdersWebhook",
+      "webhookId": "1fb44e99-d13b-4dac-ba40-76436ce590c4",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "oiaSYVeEusefeCiC",
+          "name": "OnlineStore"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:4500/orders",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "order_id",
+              "value": "={{ $json.order_id }}"
+            },
+            {
+              "name": "customer_id",
+              "value": "={{ $json.customer_id }}"
+            },
+            {
+              "name": "customer_email",
+              "value": "={{ $json.customer_email }}"
+            },
+            {
+              "name": "total",
+              "value": "={{ $json.total }}"
+            },
+            {
+              "name": "status",
+              "value": "={{ $json.status }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        848,
+        160
+      ],
+      "id": "ffc05f10-c046-4420-ae2c-e6fcdf4c7eb3",
+      "name": "ProcessingOrders",
+      "alwaysOutputData": false,
+      "notesInFlow": false,
+      "executeOnce": false,
+      "retryOnFail": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=Order number {{ $json.order_id }} has been successfully processed.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        1296,
+        64
+      ],
+      "id": "c07d6a78-9894-4d84-aa1b-ab7cdc0dc086",
+      "name": "NotifyTeam",
+      "webhookId": "5cc40939-e9af-4290-8770-4dd7007a6d99",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "q1d4m8F4nZ97lYO1",
+          "name": "Salma'sWebhook"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "04c49cdd-123b-4286-b263-cc625da5c714",
+              "leftValue": "={{ $json.body.order_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "e04f34ea-e174-4a41-bb0d-fa1aab3f8728",
+              "leftValue": "={{ $json.body.customer_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "79aba6fa-253c-4775-80e6-9d177538c70a",
+              "leftValue": "={{ $json.body.customer_email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "c33c536f-e156-48d2-8bf7-dab4090c3879",
+              "leftValue": "={{ $json.body.total }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        176,
+        256
+      ],
+      "id": "9cbb5c13-ddec-42f7-8530-5adc0b88a79f",
+      "name": "ValidateOrder"
+    },
+    {
+      "parameters": {
+        "errorMessage": "=The Order is not validate, an order_id, customer_id, customer_email and total are required."
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        400,
+        352
+      ],
+      "id": "62f080ee-2cc9-4d5b-9329-d9855687e2f4",
+      "name": "ValidationError"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "ID0l3zJJdwkDCpZw",
+          "mode": "list",
+          "cachedResultName": "OnlineStore",
+          "cachedResultUrl": "/projects/wwdoL7xK08zGJv3S/datatables/ID0l3zJJdwkDCpZw"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "order_id",
+              "keyValue": "={{$json.order_id}}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "={{$json.status}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "order_id",
+              "displayName": "order_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "customer_id",
+              "displayName": "customer_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "customer_email",
+              "displayName": "customer_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "total",
+              "displayName": "total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1072,
+        64
+      ],
+      "id": "9c987cb7-e1ac-451e-ae78-ab5eea4b65fc",
+      "name": "SetStatusProcessed"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "ID0l3zJJdwkDCpZw",
+          "mode": "list",
+          "cachedResultName": "OnlineStore",
+          "cachedResultUrl": "/projects/wwdoL7xK08zGJv3S/datatables/ID0l3zJJdwkDCpZw"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "total": "={{ $json.body.total }}",
+            "order_id": "={{ $json.body.order_id }}",
+            "customer_id": "={{ $json.body.customer_id }}",
+            "customer_email": "={{ $json.body.customer_email }}",
+            "status": "pending"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "order_id",
+              "displayName": "order_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "customer_id",
+              "displayName": "customer_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "customer_email",
+              "displayName": "customer_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "total",
+              "displayName": "total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        624,
+        160
+      ],
+      "id": "db18a575-a9b5-4dc2-ba4d-ca1196881057",
+      "name": "InsertOrders"
+    },
+    {
+      "parameters": {
+        "operation": "rowNotExists",
+        "dataTableId": {
+          "__rl": true,
+          "value": "ID0l3zJJdwkDCpZw",
+          "mode": "list",
+          "cachedResultName": "OnlineStore",
+          "cachedResultUrl": "/projects/wwdoL7xK08zGJv3S/datatables/ID0l3zJJdwkDCpZw"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "order_id",
+              "keyValue": "={{ $json.body.order_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        400,
+        160
+      ],
+      "id": "0b633ebd-3634-433d-8d84-ef7089d08a3a",
+      "name": "IfOrdersNotDuplicated"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "ID0l3zJJdwkDCpZw",
+          "mode": "list",
+          "cachedResultName": "OnlineStore",
+          "cachedResultUrl": "/projects/wwdoL7xK08zGJv3S/datatables/ID0l3zJJdwkDCpZw"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "order_id",
+              "keyValue": "={{ $json.order_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "Failed"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "order_id",
+              "displayName": "order_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "customer_id",
+              "displayName": "customer_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "customer_email",
+              "displayName": "customer_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "total",
+              "displayName": "total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1072,
+        256
+      ],
+      "id": "bfc2780a-5c4c-4a93-9cd1-a08233a7799c",
+      "name": "SetOrdersFailedstatus"
+    },
+    {
+      "parameters": {
+        "errorMessage": "API Failed"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1296,
+        256
+      ],
+      "id": "428ec3a1-a365-486f-8cde-134bb6a3d9a0",
+      "name": "FailedAPIError"
+    },
+    {
+      "parameters": {
+        "content": "## Online Store Workflow\n\nEdited By: ECHCHERQAOUI Salma\nLast Edit. 08 / 09 / 2026\n\nThis workflow receives orders via a webhook, validates the required fields, checks for duplicates, saves new orders in database, processes them through an external API, updates the order status, notifies the team, and catches any potential errors.\n",
+        "height": 352,
+        "width": 320
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        -80
+      ],
+      "id": "70ed7f36-660c-43d7-b850-82c0f9123373",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {
+    "ProcessingOrdersWebhook": [
+      {
+        "json": {
+          "body": {
+            "order_id": "ORD-1001",
+            "customer_id": "CUST-501",
+            "customer_email": "customer@example.com",
+            "total": 249.99
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "ProcessingOrdersWebhook": {
+      "main": [
+        [
+          {
+            "node": "ValidateOrder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ProcessingOrders": {
+      "main": [
+        [
+          {
+            "node": "SetStatusProcessed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SetOrdersFailedstatus",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ValidateOrder": {
+      "main": [
+        [
+          {
+            "node": "IfOrdersNotDuplicated",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ValidationError",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SetStatusProcessed": {
+      "main": [
+        [
+          {
+            "node": "NotifyTeam",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "InsertOrders": {
+      "main": [
+        [
+          {
+            "node": "ProcessingOrders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IfOrdersNotDuplicated": {
+      "main": [
+        [
+          {
+            "node": "InsertOrders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SetOrdersFailedstatus": {
+      "main": [
+        [
+          {
+            "node": "FailedAPIError",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "lHtthMckbeVblE7M",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "e6e3459e-787c-427b-8615-bcc7bce05bda",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1c5d83dcf2837c5c0b30ea27897c587f3557d43f828eb309520227db1354081c"
+  },
+  "nodeGroups": [],
+  "id": "rMq13nUIz61NoiNF",
+  "tags": []
+}
